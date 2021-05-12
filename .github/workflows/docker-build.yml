@@ -1,0 +1,42 @@
+name: Docker-Build
+
+on:
+  pull_request:
+    branches: 
+      - master
+
+  # schedule:
+  #   - cron: '0 2 * * 0' # Weekly on Sundays at 02:00
+   
+jobs:
+  build-image:
+    strategy:
+      matrix:
+        os: 
+          - ubuntu 
+    name: build-image
+    runs-on: ${{ matrix.os }}-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Publish API Image to Github Packages Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name:  WuraLab/boardly/api
+        registry: docker.pkg.github.com
+        username: ${{ secrets.GHA_GITHUB_USERNAME }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        dockerfile: ../../src/backend/Dockerfile
+        tags: "latest,v1,v2"
+
+    - name: Publish WEB Image to Github Packages Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name:  WuraLab/boardly/web
+        registry: docker.pkg.github.com
+        username: ${{ secrets.GHA_GITHUB_USERNAME }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        dockerfile: ./../src/web/Dockerfile
+        tags: "latest,v1,v2"
